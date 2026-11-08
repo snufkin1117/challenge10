@@ -174,8 +174,8 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
   </div>
 
   <div class="demo">
-    <p class="small">▼ 試用のための操作（本番にはありません）</p>
-    <div style="display:flex;gap:10px"><button class="btn ghost" id="nextDay">次の日へ ▶</button><button class="btn ghost" id="reset">最初から</button></div>
+    <p class="small">▼ 試用のための操作（本番にはありません）<br>日付が変わると自動で次の日に進みます。すぐに続きを試したいときは、左のボタンを押してください。</p>
+    <div style="display:flex;gap:10px"><button class="btn ghost" id="nextDay">試用のため1日進める ▶</button><button class="btn ghost" id="reset">最初から</button></div>
   </div>
 </section>
 
@@ -258,6 +258,16 @@ const PLAN=["dekita","erabu","tsutaeru","ureshii","gyaku","dekita","erabu","tsut
 const CAPC=["#FF8A5B","#6FB6F0","#5CC8A8"];
 
 let S;
+// 端末の日付（例：2026-11-09）
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+// 記録した回数から「何日目か」を決め、今日すでに記録したかどうかを日付で判定する
+function syncDay(){
+  if(!S||!S.grade)return;
+  S.done=S.lastDate===today();
+  // 今日の分が済んでいれば「今日が何日目だったか」、まだなら「次は何日目か」を表示する
+  S.day=Math.max(1,Math.min(10,S.done||S.log.length>=10?S.log.length:S.log.length+1));
+  save();
+}
 function fresh(){const b={};CATS.forEach(c=>b[c[0]]=Math.floor(15+Math.random()*40));return{grade:null,nick:"",day:1,done:false,log:[],cur:null,school:b,survey:null}}
 try{S=JSON.parse(localStorage.getItem("c10p2"))}catch(e){}
 if(!S)S=fresh();
@@ -286,6 +296,7 @@ function renderBars(){const max=Math.max(...Object.values(S.school));$("bars").i
 let shown=0;function animCnt(){const to=Object.values(S.school).reduce((a,b)=>a+b,0),from=shown,t0=performance.now();(function f(t){const p=Math.min(1,(t-t0)/800);shown=Math.round(from+(to-from)*p);$("cnt").textContent=shown;if(p<1)requestAnimationFrame(f)})(t0)}
 function renderHome(popKey){
   show("s-home");
+  syncDay();
   $("dayNum").textContent=S.day;$("gradeLbl").textContent=S.grade+"の保護者";
   $("pickMsg").textContent="カプセルを1つ選んでください（色の選択は自由です）";
   $("caps").innerHTML="";CAPC.forEach(c=>{const b=document.createElement("button");b.className="cap";b.style.background=c;b.style.animationDelay=Math.random()+"s";b.onclick=()=>openOdai(c);$("caps").appendChild(b)});
@@ -329,7 +340,7 @@ $("catSkip").onclick=()=>{S.cur.cat=null;finish()};
 function finish(){
 
   const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat});
-  S.done=true;if(c.cat)S.school[c.cat]++;save();
+  S.done=true;S.lastDate=today();if(c.cat)S.school[c.cat]++;save();
   toast(c.cat?cat(c.cat)[1]:"⭐",c.cat?"図鑑に記録しました":"記録しました");confetti();
   setTimeout(()=>{if(S.log.length>=10){renderCert();confetti(60)}else renderHome(c.cat)},1300);
 };
@@ -348,14 +359,16 @@ function renderCert(){
 }
 
 /* demo */
-$("nextDay").onclick=()=>{if(!S.done){toast("☝️","先に今日の分をやってみてね");return}if(S.day<10)S.day++;S.done=!!S.log.find(l=>l.day===S.day);save();renderHome()};
+$("nextDay").onclick=()=>{if(!S.done){toast("☝️","先に今日の分を記録してください");return}S.lastDate=null;syncDay();renderHome()};
+// アプリを開いたまま日付をまたいだ場合も、画面に戻ったときに次の日へ進める
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.grade&&S.log.length<10&&!$("s-home").classList.contains("hidden")){syncDay();renderHome()}});
 function resetAll(){try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();shown=0;document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
 $("reset").onclick=resetAll;$("reset2").onclick=resetAll;
 
 function toast(i,m){$("tIc").textContent=i;$("tM").textContent=m;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1100)}
 function confetti(n=26){for(let i=0;i<n;i++){const c=document.createElement("div");c.className="cf";c.style.left=Math.random()*100+"vw";c.style.background=["#FF8A5B","#FFB347","#5CC8A8","#6FB6F0","#F59AB5"][i%5];c.style.animationDuration=(1.4+Math.random()*1.4)+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),3000)}}
 
-if(S.grade){S.log.length>=10?renderCert():renderHome()}
+if(S.grade){syncDay();S.log.length>=10?renderCert():renderHome()}
 </script>
 </body>
 </html>
