@@ -166,12 +166,6 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
     <div class="stamps" id="stamps"></div>
   </div>
 
-  <div class="card counter">
-    <div class="lbl">本日、日の里学園で記録された「できた」</div>
-    <div class="small">※β版では表示例です（実際の件数ではありません）</div>
-    <div class="num"><span id="cnt">0</span> 件</div>
-    <div id="bars" style="margin-top:10px"></div>
-  </div>
 
   <div class="demo">
     <p class="small">▼ 試用のための操作（本番にはありません）<br>日付が変わると自動で次の日に進みます。すぐに続きを試したいときは、左のボタンを押してください。</p>
@@ -299,8 +293,6 @@ if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch
 /* home */
 function counts(){const m={};S.log.forEach(l=>l.cat&&(m[l.cat]=(m[l.cat]||0)+1));return m}
 function renderZukan(el,popKey){const m=counts();el.innerHTML=CATS.map(c=>`<div class="zk${m[c[0]]?" got":""}${popKey===c[0]?" pop":""}"><div class="ic">${c[1]}</div><div class="nm">${m[c[0]]?c[2]:"？？？"}</div>${m[c[0]]?`<div class="n">×${m[c[0]]}</div>`:""}</div>`).join("")}
-function renderBars(){const max=Math.max(...Object.values(S.school));$("bars").innerHTML=CATS.map(c=>`<div class="bar"><span class="nm">${c[1]} ${c[2]}</span><span class="tr"><span class="fl" style="width:${S.school[c[0]]/max*100}%"></span></span><span class="ct">${S.school[c[0]]}</span></div>`).join("")}
-let shown=0;function animCnt(){const to=Object.values(S.school).reduce((a,b)=>a+b,0),from=shown,t0=performance.now();(function f(t){const p=Math.min(1,(t-t0)/800);shown=Math.round(from+(to-from)*p);$("cnt").textContent=shown;if(p<1)requestAnimationFrame(f)})(t0)}
 function renderHome(popKey){
   show("s-home");
   syncDay();
@@ -313,9 +305,7 @@ function renderHome(popKey){
   const got=Object.keys(counts()).length;
   $("zukanHint").textContent=got<6?`残り${6-got}分野。普段とは違う場面にも、よさが見つかるかもしれません`:"6分野すべてで、よさが見つかりました";
   $("stamps").innerHTML=Array.from({length:10},(_,i)=>{const d=S.log.find(l=>l.day===i+1);return `<div class="st${d?" done":""}">${d?"★":i+1}</div>`}).join("");
-  animCnt();renderBars();
 }
-setInterval(()=>{if($("s-home").classList.contains("hidden"))return;const k=CATS[Math.floor(Math.random()*6)][0];S.school[k]++;save();animCnt();renderBars()},3500);
 
 /* odai */
 function openOdai(color){
@@ -347,7 +337,7 @@ $("catSkip").onclick=()=>{S.cur.cat=null;finish()};
 function finish(){
 
   const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat,date:today()});
-  S.done=true;S.lastDate=today();if(c.cat)S.school[c.cat]++;save();
+  S.done=true;S.lastDate=today();save();
   toast(c.cat?cat(c.cat)[1]:"⭐",c.cat?"図鑑に記録しました":"記録しました");confetti();
   setTimeout(()=>{if(S.log.length>=10){renderCert();confetti(60)}else renderHome(c.cat)},1300);
 };
@@ -391,7 +381,7 @@ function renderCert(){
 $("nextDay").onclick=()=>{if(!S.done){toast("☝️","先に今日の分を記録してください");return}S.lastDate=null;syncDay();renderHome()};
 // アプリを開いたまま日付をまたいだ場合も、画面に戻ったときに次の日へ進める
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.grade&&S.log.length<10&&!$("s-home").classList.contains("hidden")){syncDay();renderHome()}});
-function resetAll(){try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();shown=0;document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
+function resetAll(){try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
 $("reset").onclick=resetAll;$("reset2").onclick=resetAll;
 
 function toast(i,m){$("tIc").textContent=i;$("tM").textContent=m;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1100)}
