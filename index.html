@@ -113,6 +113,7 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
     <p class="sec" style="margin-top:16px">お子さんの呼び名（任意）</p>
     <input class="txt" id="nick" placeholder="例：たろう　※この端末の中だけで使います">
   </div>
+  <p class="small" style="margin:0 0 12px">※ 学年と記録の件数は、取り組みの集計のため自動で送信されます。お名前や入力した呼び名は送信されません。</p>
   <button class="btn" id="startBtn" disabled>始める</button>
   <button class="btn ghost" id="guideBtn" style="margin-top:12px">📲 ホーム画面に追加する方法</button>
 </section>
@@ -214,8 +215,8 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
     <div class="grid" id="surveyGrid" style="margin-top:10px"></div>
     <p class="small hidden" id="thanks" style="text-align:center;color:var(--mint);font-weight:700;margin-top:10px">ありがとうございました！</p>
     <div id="sendWrap" style="margin-top:14px">
-      <button class="btn mint" id="sendBtn" disabled>結果を送る</button>
-      <p class="small" id="sendMsg" style="text-align:center;margin:8px 0 0">アンケートに答えると送れるようになります。<br>送られるのは学年と記録の件数だけで、お名前などは含まれません。</p>
+      <button class="btn mint" id="sendBtn" disabled>アンケートを送る</button>
+      <p class="small" id="sendMsg" style="text-align:center;margin:8px 0 0">アンケートに答えると送れるようになります。</p>
     </div>
   </div>
   <button class="btn ghost" id="reset2">最初からやり直す</button>
@@ -333,7 +334,7 @@ $("catSkip").onclick=()=>{S.cur.cat=null;finish()};
 function finish(){
 
   const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat,date:today()});
-  S.done=true;S.lastDate=today();save();
+  S.done=true;S.lastDate=today();save();autoSend();
   toast(c.cat?cat(c.cat)[1]:"⭐",c.cat?"図鑑に記録しました":"記録しました");confetti();
   setTimeout(()=>{if(S.log.length>=10){renderCert();confetti(60)}else renderHome(c.cat)},1300);
 };
@@ -344,19 +345,27 @@ function updateSend(){
   $("sendWrap").classList.toggle("hidden",!SHEET_URL);
   $("sendBtn").disabled=!S.survey;
   if(S.sent)$("sendMsg").innerHTML="✅ 送信しました。ご協力ありがとうございました。<br>（もう一度送ると、前の内容が上書きされます）";
-  else if(S.survey)$("sendMsg").innerHTML="送られるのは学年と記録の件数だけで、お名前などは含まれません。";
+  else if(S.survey)$("sendMsg").innerHTML="回答を選んだら、ボタンを押してください。";
 }
-$("sendBtn").onclick=()=>{
+// 記録の内容をスプレッドシートへ送る（同じ端末からの送信は1行に上書きされる）
+function payload(){
   const cats={};CATS.forEach(c=>cats[c[2]]=0);S.log.forEach(l=>{if(l.cat)cats[cat(l.cat)[2]]++});
   const asked=S.log.filter(l=>TYPES[l.type].ask||TYPES[l.type].cat);
   const dates=S.log.map(l=>l.date).filter(Boolean);
   const data={uid:uid(),grade:S.grade,count:S.log.length,start:dates[0]||"",end:dates[dates.length-1]||"",cats,
     none:asked.filter(l=>!l.cat).length,survey:S.survey,
     days:S.log.map(l=>TYPES[l.type].nm+(l.cat?"："+cat(l.cat)[2]:(TYPES[l.type].ask||TYPES[l.type].cat)?"：話なし":""))};
+  return data;
+}
+function post(data){return fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(data)})}
+// 毎回の記録のあとに自動で送る（失敗しても画面には出さない。次の記録のときにまとめて送られる）
+function autoSend(){if(SHEET_URL)post(payload()).catch(()=>{})}
+$("sendBtn").onclick=()=>{
+  const data=payload();
   $("sendBtn").disabled=true;$("sendBtn").textContent="送信中…";
-  fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(data)})
-    .then(()=>{S.sent=true;save();$("sendBtn").textContent="結果を送る";updateSend();toast("✅","送信しました")})
-    .catch(()=>{$("sendBtn").textContent="結果を送る";$("sendBtn").disabled=false;$("sendMsg").textContent="送信できませんでした。電波の良い所で、もう一度押してください。"});
+  post(data)
+    .then(()=>{S.sent=true;save();$("sendBtn").textContent="アンケートを送る";updateSend();toast("✅","送信しました")})
+    .catch(()=>{$("sendBtn").textContent="アンケートを送る";$("sendBtn").disabled=false;$("sendMsg").textContent="送信できませんでした。電波の良い所で、もう一度押してください。"});
 };
 
 /* cert */
