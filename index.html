@@ -166,6 +166,7 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
     <p class="small" id="zukanHint" style="text-align:center;margin:10px 0 0"></p>
     <div class="stamps" id="stamps"></div>
   </div>
+  <p style="text-align:center;margin-top:24px"><a href="#" id="resetLink" class="small" style="color:var(--sub)">記録をすべて消して、最初からやり直す</a></p>
 
 
 </section>
@@ -387,6 +388,7 @@ function renderCert(){
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.grade&&S.log.length<10&&!$("s-home").classList.contains("hidden")){syncDay();renderHome()}});
 function resetAll(){try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
 $("reset2").onclick=resetAll;
+$("resetLink").onclick=e=>{e.preventDefault();if(confirm("これまでの記録をすべて消して、最初からやり直しますか？\n（消した記録は元に戻せません）"))resetAll()};
 
 function toast(i,m){$("tIc").textContent=i;$("tM").textContent=m;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1100)}
 function confetti(n=26){for(let i=0;i<n;i++){const c=document.createElement("div");c.className="cf";c.style.left=Math.random()*100+"vw";c.style.background=["#FF8A5B","#FFB347","#5CC8A8","#6FB6F0","#F59AB5"][i%5];c.style.animationDuration=(1.4+Math.random()*1.4)+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),3000)}}
