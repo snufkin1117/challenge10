@@ -167,10 +167,6 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
   </div>
 
 
-  <div class="demo">
-    <p class="small">▼ 試用のための操作（本番にはありません）<br>日付が変わると自動で次の日に進みます。すぐに続きを試したいときは、左のボタンを押してください。</p>
-    <div style="display:flex;gap:10px"><button class="btn ghost" id="nextDay">試用のため1日進める ▶</button><button class="btn ghost" id="reset">最初から</button></div>
-  </div>
 </section>
 
 <!-- 3 お題 -->
@@ -378,11 +374,10 @@ function renderCert(){
 }
 
 /* demo */
-$("nextDay").onclick=()=>{if(!S.done){toast("☝️","先に今日の分を記録してください");return}S.lastDate=null;syncDay();renderHome()};
 // アプリを開いたまま日付をまたいだ場合も、画面に戻ったときに次の日へ進める
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.grade&&S.log.length<10&&!$("s-home").classList.contains("hidden")){syncDay();renderHome()}});
 function resetAll(){try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
-$("reset").onclick=resetAll;$("reset2").onclick=resetAll;
+$("reset2").onclick=resetAll;
 
 function toast(i,m){$("tIc").textContent=i;$("tM").textContent=m;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1100)}
 function confetti(n=26){for(let i=0;i<n;i++){const c=document.createElement("div");c.className="cf";c.style.left=Math.random()*100+"vw";c.style.background=["#FF8A5B","#FFB347","#5CC8A8","#6FB6F0","#F59AB5"][i%5];c.style.animationDuration=(1.4+Math.random()*1.4)+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),3000)}}
