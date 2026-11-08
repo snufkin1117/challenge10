@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>チャレンジ10</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#FFF8EE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="チャレンジ10">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFF8EE;--ink:#3a3330;--sub:#8a7f78;--main:#FF8A5B;--mint:#5CC8A8;--sky:#6FB6F0;--line:#F1E6DA}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"M PLUS Rounded 1c",sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.app{max-width:440px;margin:0 auto;padding:18px 18px 40px}
+.badge{display:inline-block;font-size:11px;background:#3a3330;color:#fff;border-radius:99px;padding:3px 10px;margin-bottom:10px}
+h1{font-size:20px;margin:0 0 4px;font-weight:800}
+.lead{color:var(--sub);font-size:13px;margin:0 0 16px;line-height:1.7}
+.card{background:#fff;border-radius:22px;padding:18px;box-shadow:0 4px 0 var(--line);margin-bottom:14px}
+.btn{display:block;width:100%;border:none;border-radius:18px;padding:16px;font-family:inherit;font-size:17px;font-weight:800;color:#fff;background:var(--main);box-shadow:0 5px 0 #E06A3B;cursor:pointer}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #E06A3B}
+.btn.mint{background:var(--mint);box-shadow:0 5px 0 #3FA587}
+.btn.kid{background:linear-gradient(135deg,#FFB347,#FF8A5B);font-size:22px;padding:22px;border-radius:24px}
+.btn.ghost{background:#fff;color:var(--sub);box-shadow:0 3px 0 var(--line);font-size:14px;padding:12px;border:2px solid var(--line)}
+.btn:disabled{opacity:.4}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.chip{border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px 4px;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+.chip.on{border-color:var(--main);background:#FFF0E8;color:#D2562A}
+.chip .ic{display:block;font-size:26px;margin-bottom:3px}
+input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12px;font-family:inherit;font-size:16px}
+.hidden{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.day{font-weight:800;font-size:15px}.day b{font-size:26px;color:var(--main)}
+.pill{font-size:12px;background:#fff;border-radius:99px;padding:4px 10px;color:var(--sub);border:1px solid var(--line)}
+.stamps{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:12px}
+.st{aspect-ratio:1;border-radius:50%;border:2px dashed #E8D9C8;display:flex;align-items:center;justify-content:center;font-size:10px;color:#CDBBA8;font-weight:700}
+.st.done{border:none;background:radial-gradient(circle at 35% 35%,#FFD27A,#FF9F45);color:#fff}
+.zukan{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.zk{border-radius:18px;padding:12px 4px;text-align:center;background:#FBF5EE;border:2px dashed #E8D9C8}
+.zk .ic{font-size:30px;filter:grayscale(1) brightness(.2);opacity:.18}
+.zk .nm{font-size:12px;font-weight:700;color:#CDBBA8;margin-top:4px}
+.zk.got{background:#FFF3E2;border:2px solid #FFC98A}.zk.got .ic{filter:none;opacity:1}.zk.got .nm{color:var(--ink)}
+.zk .n{font-size:11px;color:var(--main);font-weight:800}
+.zk.pop{animation:pop .6s}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.handoff{background:#FFF0E8;border-radius:16px;padding:10px 12px;font-size:13px;font-weight:700;color:#D2562A;text-align:center;margin-bottom:12px}
+.caps{display:flex;justify-content:center;gap:16px;margin:8px 0 4px}
+.cap{width:80px;height:80px;border-radius:50%;border:none;cursor:pointer;position:relative;box-shadow:0 5px 0 rgba(0,0,0,.12);animation:wig .9s ease infinite}
+.cap:after{content:"";position:absolute;left:0;right:0;bottom:0;height:50%;background:#fff;border-radius:0 0 40px 40px;border-top:3px solid rgba(0,0,0,.06)}
+@keyframes wig{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.capbig{width:110px;height:110px;margin:0 auto 10px;position:relative;animation:drop .6s cubic-bezier(.3,1.6,.5,1)}
+.capbig .t,.capbig .b{position:absolute;left:0;width:110px;height:55px}
+.capbig .t{top:0;border-radius:55px 55px 0 0;transition:transform .5s}
+.capbig .b{bottom:0;border-radius:0 0 55px 55px;background:#fff;border:3px solid #eee;border-top:none}
+.capbig.open .t{transform:translateY(-40px) rotate(-25deg)}
+@keyframes drop{0%{transform:translateY(-80px) scale(.5);opacity:0}100%{transform:none;opacity:1}}
+.odai{text-align:center;animation:fi .5s}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:#fff;border-radius:99px;padding:4px 12px;margin-bottom:10px}
+.q{font-size:22px;font-weight:800;line-height:1.5;margin:4px 0 8px}
+.hint{font-size:13px;color:var(--sub);line-height:1.7}
+.aim{margin-top:6px}
+.aim summary{list-style:none;cursor:pointer;font-size:12px;color:var(--sub);display:inline-block;padding:4px 12px;border:1px solid var(--line);border-radius:99px}
+.aim summary::-webkit-details-marker{display:none}
+.aim summary:after{content:" ▼";font-size:10px}
+.aim[open] summary:after{content:" ▲"}
+.aim .hint{margin-top:10px;text-align:left;background:#FBF5EE;border-radius:12px;padding:10px 12px}
+.sec{font-size:15px;font-weight:800;margin:0 0 10px}
+.small{font-size:12px;color:var(--sub);line-height:1.7}
+.step{font-size:11px;font-weight:800;color:#fff;background:var(--sky);border-radius:99px;padding:3px 10px;display:inline-block;margin-bottom:8px}
+.result{border-radius:16px;padding:12px;font-size:14px;font-weight:700;text-align:center;margin-bottom:14px;animation:fi .4s}
+.counter{text-align:center}.counter .num{font-size:38px;font-weight:800;color:var(--mint);line-height:1.1}.counter .lbl{font-size:13px;color:var(--sub)}
+.bar{display:flex;align-items:center;gap:8px;font-size:12px;margin:6px 0}
+.bar .nm{width:84px;flex:none}.bar .tr{flex:1;height:10px;background:#F4ECE3;border-radius:99px;overflow:hidden}
+.bar .fl{height:100%;background:var(--mint);border-radius:99px;transition:width .8s}.bar .ct{width:30px;text-align:right;color:var(--sub)}
+.toast{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.6);background:#fff;border-radius:26px;padding:22px 30px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:all .3s;z-index:20}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}.toast .big{font-size:52px}.toast .m{font-weight:800;font-size:17px;margin-top:4px}
+.cf{position:fixed;top:-10px;width:9px;height:14px;z-index:19;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.cert{text-align:center;border:4px double #FFB347;border-radius:22px;padding:24px 16px;background:linear-gradient(#FFFDF7,#FFF3DC)}
+.cert .ttl{font-size:24px;font-weight:800;color:#E07B2E;margin:6px 0}
+.li{display:flex;gap:8px;font-size:14px;padding:8px 0;border-bottom:1px solid var(--line);line-height:1.5}
+.li:last-child{border:none}.li span{flex:none;width:42px;font-size:11px;color:var(--sub);padding-top:2px}
+.osTabs{display:flex;gap:8px;margin-bottom:12px}
+.osTabs button{flex:1;border:2px solid var(--line);background:#fff;border-radius:14px;padding:10px;font-family:inherit;font-weight:800;font-size:15px;color:var(--sub);cursor:pointer}
+.osTabs button.on{border-color:var(--main);color:#D2562A;background:#FFF0E8}
+.note{background:#FFF7DA;border-radius:14px;padding:10px 12px;font-size:12px;line-height:1.7;margin-bottom:12px}
+.gstep{display:flex;gap:12px;background:#fff;border-radius:18px;padding:14px;box-shadow:0 3px 0 var(--line);margin-bottom:10px;font-size:15px}
+.gn{flex:none;width:30px;height:30px;border-radius:50%;background:var(--main);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.mock{display:flex;align-items:center;gap:10px;margin-top:8px;background:#F4F1EE;border-radius:12px;padding:8px 12px;font-size:14px}
+.mock .ico{width:34px;height:34px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;color:#2F7BEA;flex:none}
+.mock .appic{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#FFB347,#FF8A5B);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.demo{margin-top:20px;border-top:2px dashed var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- 1 はじめに -->
+<section id="s-start">
+  <span class="badge">β版（試用版）</span>
+  <h1>保護者も一緒に<br>チャレンジ10 🌱</h1>
+  <p class="lead">1日1回、表示された問いかけをお子さんにしていただき、その内容を記録します。所要時間は10秒程度です。<br>10日間の記録は「いいところ図鑑」としてまとまります。</p>
+  <div class="card">
+    <p class="sec">お子さんの学年</p>
+    <div class="grid" id="gradeGrid"></div>
+    <p class="sec" style="margin-top:16px">お子さんの呼び名（任意）</p>
+    <input class="txt" id="nick" placeholder="例：たろう　※この端末の中だけで使います">
+  </div>
+  <button class="btn" id="startBtn" disabled>始める</button>
+  <button class="btn ghost" id="guideBtn" style="margin-top:12px">📲 ホーム画面に追加する方法</button>
+</section>
+
+
+<!-- 使い方 -->
+<section id="s-guide" class="hidden">
+  <h1>ホーム画面に追加する方法</h1>
+  <p class="lead">追加すると、アプリのようにアイコンから毎日開けます。<br>（追加しなくても、配信アプリのリンクから毎回開けば参加できます）</p>
+  <div class="osTabs"><button class="on" data-os="ios">iPhone</button><button data-os="android">Android</button></div>
+
+  <div id="g-ios">
+    <div class="gstep"><div class="gn">1</div><div><b>まず、ブラウザ（Safari）で開く</b><div class="mock"><span class="ico">↗︎</span>Safariで開く／ブラウザで開く</div><p class="small">配信アプリやLINEのリンクから開くと、そのアプリの中で表示されます。画面の右上や右下のメニューから、上のどちらかを押してください。<br>※ すでにSafariで開いている場合は、2へ進んでください。</p></div></div>
+    <div class="gstep"><div class="gn">2</div><div><b>画面下の共有ボタンを押す</b><div class="mock"><span class="ico">⬆︎</span><span class="small">四角から矢印が出ているボタン</span></div></div></div>
+    <div class="gstep"><div class="gn">3</div><div><b>「ホーム画面に追加」を選ぶ</b><div class="mock"><span class="ico">⊞</span>ホーム画面に追加</div><p class="small">見つからないときは、メニューを下にスクロールしてください。</p></div></div>
+    <div class="gstep"><div class="gn">4</div><div><b>右上の「追加」を押す</b><div class="mock"><span class="appic">🌱</span>チャレンジ10</div><p class="small">ホーム画面にアイコンができれば完了です。</p></div></div>
+  </div>
+
+  <div id="g-android" class="hidden">
+    <div class="gstep"><div class="gn">1</div><div><b>まず、ブラウザで開く</b><div class="mock"><span class="ico">↗︎</span>ブラウザで開く</div><p class="small">配信アプリやLINEのリンクから開くと、そのアプリの中で表示されます。右上の「︙」などのメニューから「ブラウザで開く」を押してください。<br>※ すでにChromeなどのブラウザで開いている場合は、2へ進んでください。</p></div></div>
+    <div class="gstep"><div class="gn">2</div><div><b>右上の「︙」（メニュー）を押す</b><div class="mock"><span class="ico">︙</span><span class="small">縦に点が3つ並んだボタン</span></div></div></div>
+    <div class="gstep"><div class="gn">3</div><div><b>「ホーム画面に追加」を選ぶ</b><div class="mock"><span class="ico">📲</span>ホーム画面に追加</div><p class="small">機種によっては「アプリをインストール」と表示されます。</p></div></div>
+    <div class="gstep"><div class="gn">4</div><div><b>「追加」を押す</b><div class="mock"><span class="appic">🌱</span>チャレンジ10</div><p class="small">ホーム画面にアイコンができれば完了です。</p></div></div>
+  </div>
+
+  <div class="card" style="margin-top:6px">
+    <p class="sec">毎日の使い方</p>
+    <p class="small" style="margin:0">アイコンを開く → カプセルを選ぶ → お子さんに声をかける → 「声をかけました」 → 話の分野を1つ選ぶ。<br>毎日の通知はありません。夕食後など、時間を決めておくと続けやすくなります。</p>
+  </div>
+  <button class="btn" id="guideBack">戻る</button>
+</section>
+
+<!-- 2 ホーム -->
+<section id="s-home" class="hidden">
+  <div class="top"><div class="day"><b id="dayNum">1</b> 日目 / 10日</div><span class="pill" id="gradeLbl"></span></div>
+
+  <div id="homeMain" class="card" style="text-align:center">
+    <p class="sec" id="pickMsg"></p>
+    <div class="caps" id="caps"></div>
+  </div>
+  <div id="homeDone" class="card hidden" style="text-align:center">
+    <div style="font-size:38px">✅</div>
+    <p class="sec" style="margin:6px 0 4px">本日の記録は完了しています</p>
+    <p class="small">次回は明日以降に記録できます。</p>
+  </div>
+
+  <div class="card">
+    <p class="sec" id="zukanTtl"></p>
+    <div class="zukan" id="zukan"></div>
+    <p class="small" id="zukanHint" style="text-align:center;margin:10px 0 0"></p>
+    <div class="stamps" id="stamps"></div>
+  </div>
+
+  <div class="card counter">
+    <div class="lbl">本日、日の里学園で記録された「できた」</div>
+    <div class="small">※β版では表示例です（実際の件数ではありません）</div>
+    <div class="num"><span id="cnt">0</span> 件</div>
+    <div id="bars" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card fb">
+    <p class="sec">🙏 β版の感想を聞かせてください</p>
+    <p class="small" style="margin:0 0 10px">使いやすさや、実際にやってみたいと思うかなど、3分ほどのアンケートです。</p>
+    <a class="btn mint fbLink" href="#" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">感想を送る</a>
+  </div>
+  <div class="demo">
+    <p class="small">▼ 試用のための操作（本番にはありません）</p>
+    <div style="display:flex;gap:10px"><button class="btn ghost" id="nextDay">次の日へ ▶</button><button class="btn ghost" id="reset">最初から</button></div>
+  </div>
+</section>
+
+<!-- 3 お題 -->
+<section id="s-odai" class="hidden">
+  <div class="top"><div class="day"><b id="dayNum2">1</b> 日目のお題</div></div>
+  <div class="card" style="padding:24px 18px">
+    <div class="capbig" id="capbig"><div class="t" id="capTop"></div><div class="b"></div></div>
+    <div class="odai hidden" id="odaiBox">
+      <span class="tag" id="oTag"></span>
+      <div class="q" id="oQ"></div>
+      <details class="aim" id="oAim"><summary>この問いかけのねらい</summary><div class="hint" id="oHint"></div></details>
+    </div>
+  </div>
+
+  <div id="didWrap" class="hidden">
+    <button class="btn mint" id="didBtn">声をかけました</button>
+  </div>
+
+  <!-- 何の話だったか -->
+  <div id="catWrap" class="hidden">
+    <div class="card">
+            <p class="sec" id="catTtl"></p>
+      <div class="grid" id="catGrid"></div>
+    </div>
+    <button class="btn ghost" id="catSkip">今回は特に話がなかった</button>
+    <p class="small" style="text-align:center;margin-top:8px">お子さんから話がなかった日も、声をかけたことが記録として残ります。</p>
+  </div>
+
+</section>
+
+<!-- 4 達成 -->
+<section id="s-cert" class="hidden">
+  <div class="cert">
+    <div style="font-size:60px">🏅</div>
+    <div class="small" id="certFor"></div>
+    <div class="ttl" id="certTtl"></div>
+    <p style="line-height:1.8;font-size:14px;margin:8px 0 0" id="certMsg"></p>
+  </div>
+  <div class="handoff" style="margin-top:14px">この画面は、お子さんに見せていただくことを想定しています</div>
+  <div class="card"><p class="sec" id="cZTtl"></p><div class="zukan" id="cZukan"></div></div>
+  <div class="card"><p class="sec">10日間の記録</p><div id="cList"></div></div>
+  <div class="card">
+    <p class="sec">保護者の方へ：アンケート（1問）</p>
+    <p class="small">この10日間で、お子さんやご自身の「よさ」に気づくことはありましたか？</p>
+    <div class="grid" id="surveyGrid" style="margin-top:10px"></div>
+    <p class="small hidden" id="thanks" style="text-align:center;color:var(--mint);font-weight:700;margin-top:10px">ありがとうございました！</p>
+  </div>
+  <div class="card fb">
+    <p class="sec">🙏 β版の感想を聞かせてください</p>
+    <p class="small" style="margin:0 0 10px">使いやすさや、実際にやってみたいと思うかなど、3分ほどのアンケートです。</p>
+    <a class="btn mint fbLink" href="#" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">感想を送る</a>
+  </div>
+  <button class="btn ghost" id="reset2">最初からやり直す</button>
+</section>
+
+<div class="toast" id="toast"><div class="big" id="tIc"></div><div class="m" id="tM"></div></div>
+</div>
+
+<script>
+// ▼ Googleフォームを作成したら、ここにURLを貼り付けてください
+const FORM_URL="https://forms.gle/XXXXXXXX";
+
+const GR=["小1","小2","小3","小4","小5","小6","中1","中2","中3"];
+const CATS=[["benkyo","📚","勉強"],["tetsudai","🧹","お手伝い"],["tomo","🤝","友達"],["undo","⚽","運動"],["suki","🎨","好きなこと"],["seikatsu","🍚","生活"]];
+const TYPES={
+ dekita:{nm:"できたこと",c:"#FF8A5B",ask:true,list:[
+   ["「今日、何かできたことあった？」","ささいなことでも構いません。「給食を全部食べた」なども立派な「できた」です。"],
+   ["「今日、頑張ったなって思うことは？」","結果ではなく、取り組んだ過程に目を向ける問いかけです。"],
+   ["「昨日より上手にできたことある？」","お子さん自身が成長に気づくきっかけになる問いかけです。"],
+   ["「今日、誰かの役に立てたことある？」","お手伝いや友達への親切など、人との関わりの中での「できた」を聞く問いかけです。"]]},
+ ureshii:{nm:"嬉しいこと",c:"#F59AB5",ask:true,list:[
+   ["「今日、嬉しかったことある？」","「できたこと」より答えやすい、気持ちに目を向ける問いかけです。"],
+   ["「今日一番笑ったのはどんなとき？」","楽しかった出来事を振り返る問いかけです。"]]},
+ erabu:{nm:"選ばせる",c:"#6FB6F0",ask:false,list:[
+   ["「今日の夕ご飯、AとBどっちがいい？」","小さな選択を任せることで、「自分で決めた」という経験が積み重なります。"],
+   ["「お風呂と宿題、どっちを先にする？」","順番をお子さんに決めてもらうだけで構いません。"],
+   ["「寝る前の15分、何に使いたい？」","お子さんが選んだことは、なるべくそのまま尊重してください。"]]},
+ tsutaeru:{nm:"伝える",c:"#5CC8A8",ask:false,cat:true,list:[
+   ["「〇〇してくれて、ありがとう」","今日のお子さんの行動について、1つお礼を伝えてください。"],
+   ["「〇〇なところ、いいね」","お子さんの性格や行動のよいところを、1つ言葉にして伝えてください。"]]},
+ gyaku:{nm:"逆質問",c:"#B79CF0",ask:false,list:[
+   ["今日はお子さんから質問してもらう回です","お子さんから「今日できたことある？」と聞いてもらい、保護者の方が答えてください。大人が自分のよさを言葉にする姿を見せる回です。"]]}
+};
+// 10日間で種類が偏らないよう、出る順番をあらかじめ決めておく
+const PLAN=["dekita","erabu","tsutaeru","ureshii","gyaku","dekita","erabu","tsutaeru","gyaku","dekita"];
+const CAPC=["#FF8A5B","#6FB6F0","#5CC8A8"];
+
+let S;
+function fresh(){const b={};CATS.forEach(c=>b[c[0]]=Math.floor(15+Math.random()*40));return{grade:null,nick:"",day:1,done:false,log:[],cur:null,school:b,survey:null}}
+try{S=JSON.parse(localStorage.getItem("c10p2"))}catch(e){}
+if(!S)S=fresh();
+function save(){try{localStorage.setItem("c10p2",JSON.stringify(S))}catch(e){}}
+const $=id=>document.getElementById(id);
+const who=()=>S.nick?S.nick+"さん":"お子さん";
+function show(id){["s-start","s-guide","s-home","s-odai","s-cert"].forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo(0,0)}
+const cat=k=>CATS.find(c=>c[0]===k);
+
+/* start */
+GR.forEach(g=>{const b=document.createElement("button");b.className="chip";b.textContent=g;b.onclick=()=>{document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");S.grade=g;$("startBtn").disabled=false};$("gradeGrid").appendChild(b)});
+$("startBtn").onclick=()=>{S.nick=$("nick").value.trim();save();renderHome()};
+
+$("guideBtn").onclick=()=>show("s-guide");$("guideBack").onclick=()=>show("s-start");
+document.querySelectorAll(".osTabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".osTabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("g-ios").classList.toggle("hidden",b.dataset.os!=="ios");$("g-android").classList.toggle("hidden",b.dataset.os!=="android")});
+if(/android/i.test(navigator.userAgent)){document.querySelector('[data-os="android"]').click()}
+
+document.querySelectorAll(".fbLink").forEach(a=>a.href=FORM_URL);
+const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+if(standalone)$("guideBtn").classList.add("hidden");
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+
+/* home */
+function counts(){const m={};S.log.forEach(l=>l.cat&&(m[l.cat]=(m[l.cat]||0)+1));return m}
+function renderZukan(el,popKey){const m=counts();el.innerHTML=CATS.map(c=>`<div class="zk${m[c[0]]?" got":""}${popKey===c[0]?" pop":""}"><div class="ic">${c[1]}</div><div class="nm">${m[c[0]]?c[2]:"？？？"}</div>${m[c[0]]?`<div class="n">×${m[c[0]]}</div>`:""}</div>`).join("")}
+function renderBars(){const max=Math.max(...Object.values(S.school));$("bars").innerHTML=CATS.map(c=>`<div class="bar"><span class="nm">${c[1]} ${c[2]}</span><span class="tr"><span class="fl" style="width:${S.school[c[0]]/max*100}%"></span></span><span class="ct">${S.school[c[0]]}</span></div>`).join("")}
+let shown=0;function animCnt(){const to=Object.values(S.school).reduce((a,b)=>a+b,0),from=shown,t0=performance.now();(function f(t){const p=Math.min(1,(t-t0)/800);shown=Math.round(from+(to-from)*p);$("cnt").textContent=shown;if(p<1)requestAnimationFrame(f)})(t0)}
+function renderHome(popKey){
+  show("s-home");
+  $("dayNum").textContent=S.day;$("gradeLbl").textContent=S.grade+"の保護者";
+  $("pickMsg").textContent="カプセルを1つ選んでください（色の選択は自由です）";
+  $("caps").innerHTML="";CAPC.forEach(c=>{const b=document.createElement("button");b.className="cap";b.style.background=c;b.style.animationDelay=Math.random()+"s";b.onclick=()=>openOdai(c);$("caps").appendChild(b)});
+  $("homeMain").classList.toggle("hidden",S.done);$("homeDone").classList.toggle("hidden",!S.done);
+  $("zukanTtl").textContent="📖 "+who()+"のいいところ図鑑";
+  renderZukan($("zukan"),popKey);
+  const got=Object.keys(counts()).length;
+  $("zukanHint").textContent=got<6?`残り${6-got}分野。普段とは違う場面にも、よさが見つかるかもしれません`:"6分野すべてで、よさが見つかりました";
+  $("stamps").innerHTML=Array.from({length:10},(_,i)=>{const d=S.log.find(l=>l.day===i+1);return `<div class="st${d?" done":""}">${d?"★":i+1}</div>`}).join("");
+  animCnt();renderBars();
+}
+setInterval(()=>{if($("s-home").classList.contains("hidden"))return;const k=CATS[Math.floor(Math.random()*6)][0];S.school[k]++;save();animCnt();renderBars()},3500);
+
+/* odai */
+function openOdai(color){
+  const type=PLAN[S.day-1],o=TYPES[type],item=o.list[Math.floor(Math.random()*o.list.length)];
+  S.cur={type,q:item[0],pred:null,cat:null};
+  show("s-odai");$("dayNum2").textContent=S.day;
+  ["odaiBox","didWrap","catWrap"].forEach(i=>$(i).classList.add("hidden"));
+  const cb=$("capbig");cb.classList.remove("hidden","open");cb.style.animation="none";void cb.offsetWidth;cb.style.animation="";
+  $("capTop").style.background=color;
+  setTimeout(()=>cb.classList.add("open"),650);
+  setTimeout(()=>{
+    cb.classList.add("hidden");
+    $("oTag").textContent=o.nm;$("oTag").style.background=o.c;$("oQ").textContent=item[0];$("oHint").textContent=item[1];$("oAim").open=false;
+    $("odaiBox").classList.remove("hidden");
+    $("didWrap").classList.remove("hidden");
+  },1200);
+}
+function chips(el,fn){el.innerHTML="";CATS.forEach(c=>{const b=document.createElement("button");b.className="chip";b.innerHTML=`<span class="ic">${c[1]}</span>${c[2]}`;b.onclick=()=>fn(c[0]);el.appendChild(b)})}
+$("didBtn").onclick=()=>{$("didWrap").classList.add("hidden");const o=TYPES[S.cur.type];if(o.ask||o.cat)showCat();else finish()};
+function showCat(){
+  $("catWrap").classList.remove("hidden");
+  const t=S.cur.type==="tsutaeru";
+  $("catTtl").textContent=t?"どの分野のことを伝えましたか？":"お子さんの話は、どの分野のことでしたか？";
+  $("catSkip").textContent=t?"今回は伝えられなかった":"今回は特に話がなかった";
+  chips($("catGrid"),k=>{S.cur.cat=k;finish()});
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+}
+$("catSkip").onclick=()=>{S.cur.cat=null;finish()};
+function finish(){
+
+  const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat});
+  S.done=true;if(c.cat)S.school[c.cat]++;save();
+  toast(c.cat?cat(c.cat)[1]:"⭐",c.cat?"図鑑に記録しました":"記録しました");confetti();
+  setTimeout(()=>{if(S.log.length>=10){renderCert();confetti(60)}else renderHome(c.cat)},1300);
+};
+
+/* cert */
+function renderCert(){
+  show("s-cert");
+  $("certFor").textContent="保護者も一緒にチャレンジ10";
+  $("certTtl").textContent=(S.nick?S.nick+"さんの":"")+"10のできた";
+  const n=S.log.filter(l=>l.cat).length,g=Object.keys(counts()).length;
+  $("certMsg").innerHTML=`10日間で <b>${n}個</b> の「できた」と<br><b>${g}種類</b> のいいところが見つかりました。<br>おうちの人と一緒に、よく頑張りました！`;
+  $("cZTtl").textContent="📖 "+who()+"のいいところ図鑑";renderZukan($("cZukan"));
+  $("cList").innerHTML=S.log.map(l=>`<div class="li"><span>${l.day}日目</span><div>${TYPES[l.type].nm}${l.cat?"　"+cat(l.cat)[1]+" "+cat(l.cat)[2]:""}</div></div>`).join("");
+  $("surveyGrid").innerHTML="";
+  [["😄","あった"],["🙂","少しあった"],["🤔","あまりなかった"]].forEach(([ic,nm])=>{const b=document.createElement("button");b.className="chip"+(S.survey===nm?" on":"");b.innerHTML=`<span class="ic">${ic}</span>${nm}`;b.onclick=()=>{S.survey=nm;save();document.querySelectorAll("#surveyGrid .chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("thanks").classList.remove("hidden")};$("surveyGrid").appendChild(b)});
+}
+
+/* demo */
+$("nextDay").onclick=()=>{if(!S.done){toast("☝️","先に今日の分をやってみてね");return}if(S.day<10)S.day++;S.done=!!S.log.find(l=>l.day===S.day);save();renderHome()};
+function resetAll(){try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();shown=0;document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
+$("reset").onclick=resetAll;$("reset2").onclick=resetAll;
+
+function toast(i,m){$("tIc").textContent=i;$("tM").textContent=m;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1100)}
+function confetti(n=26){for(let i=0;i<n;i++){const c=document.createElement("div");c.className="cf";c.style.left=Math.random()*100+"vw";c.style.background=["#FF8A5B","#FFB347","#5CC8A8","#6FB6F0","#F59AB5"][i%5];c.style.animationDuration=(1.4+Math.random()*1.4)+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),3000)}}
+
+if(S.grade){S.log.length>=10?renderCert():renderHome()}
+</script>
+</body>
+</html>
