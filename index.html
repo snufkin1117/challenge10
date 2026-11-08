@@ -173,11 +173,6 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
     <div id="bars" style="margin-top:10px"></div>
   </div>
 
-  <div class="card fb">
-    <p class="sec">🙏 β版の感想を聞かせてください</p>
-    <p class="small" style="margin:0 0 10px">使いやすさや、実際にやってみたいと思うかなど、3分ほどのアンケートです。</p>
-    <a class="btn mint fbLink" href="#" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">感想を送る</a>
-  </div>
   <div class="demo">
     <p class="small">▼ 試用のための操作（本番にはありません）</p>
     <div style="display:flex;gap:10px"><button class="btn ghost" id="nextDay">次の日へ ▶</button><button class="btn ghost" id="reset">最初から</button></div>
@@ -229,11 +224,6 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
     <div class="grid" id="surveyGrid" style="margin-top:10px"></div>
     <p class="small hidden" id="thanks" style="text-align:center;color:var(--mint);font-weight:700;margin-top:10px">ありがとうございました！</p>
   </div>
-  <div class="card fb">
-    <p class="sec">🙏 β版の感想を聞かせてください</p>
-    <p class="small" style="margin:0 0 10px">使いやすさや、実際にやってみたいと思うかなど、3分ほどのアンケートです。</p>
-    <a class="btn mint fbLink" href="#" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">感想を送る</a>
-  </div>
   <button class="btn ghost" id="reset2">最初からやり直す</button>
 </section>
 
@@ -241,8 +231,6 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 </div>
 
 <script>
-// ▼ Googleフォームを作成したら、ここにURLを貼り付けてください
-const FORM_URL="https://forms.gle/XXXXXXXX";
 
 const GR=["小1","小2","小3","小4","小5","小6","中1","中2","中3"];
 const CATS=[["benkyo","📚","勉強"],["tetsudai","🧹","お手伝い"],["tomo","🤝","友達"],["undo","⚽","運動"],["suki","🎨","好きなこと"],["seikatsu","🍚","生活"]];
@@ -287,7 +275,6 @@ $("guideBtn").onclick=()=>show("s-guide");$("guideBack").onclick=()=>show("s-sta
 document.querySelectorAll(".osTabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".osTabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("g-ios").classList.toggle("hidden",b.dataset.os!=="ios");$("g-android").classList.toggle("hidden",b.dataset.os!=="android")});
 if(/android/i.test(navigator.userAgent)){document.querySelector('[data-os="android"]').click()}
 
-document.querySelectorAll(".fbLink").forEach(a=>a.href=FORM_URL);
 const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
 if(standalone)$("guideBtn").classList.add("hidden");
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
