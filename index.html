@@ -223,6 +223,10 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
     <p class="small">この10日間で、お子さんやご自身の「よさ」に気づくことはありましたか？</p>
     <div class="grid" id="surveyGrid" style="margin-top:10px"></div>
     <p class="small hidden" id="thanks" style="text-align:center;color:var(--mint);font-weight:700;margin-top:10px">ありがとうございました！</p>
+    <div id="sendWrap" style="margin-top:14px">
+      <button class="btn mint" id="sendBtn" disabled>結果を送る</button>
+      <p class="small" id="sendMsg" style="text-align:center;margin:8px 0 0">アンケートに答えると送れるようになります。<br>送られるのは学年と記録の件数だけで、お名前などは含まれません。</p>
+    </div>
   </div>
   <button class="btn ghost" id="reset2">最初からやり直す</button>
 </section>
@@ -231,6 +235,9 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 </div>
 
 <script>
+// ▼ 結果を受け取るGoogleスプレッドシート（Apps Script）のURL。空の間は「結果を送る」を表示しない
+const SHEET_URL="";
+
 
 const GR=["小1","小2","小3","小4","小5","小6","中1","中2","中3"];
 const CATS=[["benkyo","📚","勉強"],["tetsudai","🧹","お手伝い"],["tomo","🤝","友達"],["undo","⚽","運動"],["suki","🎨","好きなこと"],["seikatsu","🍚","生活"]];
@@ -339,10 +346,31 @@ function showCat(){
 $("catSkip").onclick=()=>{S.cur.cat=null;finish()};
 function finish(){
 
-  const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat});
+  const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat,date:today()});
   S.done=true;S.lastDate=today();if(c.cat)S.school[c.cat]++;save();
   toast(c.cat?cat(c.cat)[1]:"⭐",c.cat?"図鑑に記録しました":"記録しました");confetti();
   setTimeout(()=>{if(S.log.length>=10){renderCert();confetti(60)}else renderHome(c.cat)},1300);
+};
+
+/* 結果の送信 */
+function uid(){if(!S.uid){S.uid=Math.random().toString(36).slice(2,10);save()}return S.uid}
+function updateSend(){
+  $("sendWrap").classList.toggle("hidden",!SHEET_URL);
+  $("sendBtn").disabled=!S.survey;
+  if(S.sent)$("sendMsg").innerHTML="✅ 送信しました。ご協力ありがとうございました。<br>（もう一度送ると、前の内容が上書きされます）";
+  else if(S.survey)$("sendMsg").innerHTML="送られるのは学年と記録の件数だけで、お名前などは含まれません。";
+}
+$("sendBtn").onclick=()=>{
+  const cats={};CATS.forEach(c=>cats[c[2]]=0);S.log.forEach(l=>{if(l.cat)cats[cat(l.cat)[2]]++});
+  const asked=S.log.filter(l=>TYPES[l.type].ask||TYPES[l.type].cat);
+  const dates=S.log.map(l=>l.date).filter(Boolean);
+  const data={uid:uid(),grade:S.grade,count:S.log.length,start:dates[0]||"",end:dates[dates.length-1]||"",cats,
+    none:asked.filter(l=>!l.cat).length,survey:S.survey,
+    days:S.log.map(l=>TYPES[l.type].nm+(l.cat?"："+cat(l.cat)[2]:(TYPES[l.type].ask||TYPES[l.type].cat)?"：話なし":""))};
+  $("sendBtn").disabled=true;$("sendBtn").textContent="送信中…";
+  fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(data)})
+    .then(()=>{S.sent=true;save();$("sendBtn").textContent="結果を送る";updateSend();toast("✅","送信しました")})
+    .catch(()=>{$("sendBtn").textContent="結果を送る";$("sendBtn").disabled=false;$("sendMsg").textContent="送信できませんでした。電波の良い所で、もう一度押してください。"});
 };
 
 /* cert */
@@ -355,7 +383,8 @@ function renderCert(){
   $("cZTtl").textContent="📖 "+who()+"のいいところ図鑑";renderZukan($("cZukan"));
   $("cList").innerHTML=S.log.map(l=>`<div class="li"><span>${l.day}日目</span><div>${TYPES[l.type].nm}${l.cat?"　"+cat(l.cat)[1]+" "+cat(l.cat)[2]:""}</div></div>`).join("");
   $("surveyGrid").innerHTML="";
-  [["😄","あった"],["🙂","少しあった"],["🤔","あまりなかった"]].forEach(([ic,nm])=>{const b=document.createElement("button");b.className="chip"+(S.survey===nm?" on":"");b.innerHTML=`<span class="ic">${ic}</span>${nm}`;b.onclick=()=>{S.survey=nm;save();document.querySelectorAll("#surveyGrid .chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("thanks").classList.remove("hidden")};$("surveyGrid").appendChild(b)});
+  [["😄","あった"],["🙂","少しあった"],["🤔","あまりなかった"]].forEach(([ic,nm])=>{const b=document.createElement("button");b.className="chip"+(S.survey===nm?" on":"");b.innerHTML=`<span class="ic">${ic}</span>${nm}`;b.onclick=()=>{S.survey=nm;save();document.querySelectorAll("#surveyGrid .chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("thanks").classList.remove("hidden");updateSend()};$("surveyGrid").appendChild(b)});
+  updateSend();
 }
 
 /* demo */
