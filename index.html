@@ -386,7 +386,7 @@ function renderCert(){
 /* demo */
 // アプリを開いたまま日付をまたいだ場合も、画面に戻ったときに次の日へ進める
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.grade&&S.log.length<10&&!$("s-home").classList.contains("hidden")){syncDay();renderHome()}});
-function resetAll(){try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
+function resetAll(){const keep=S.uid;try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();if(keep){S.uid=keep;save()}document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
 $("reset2").onclick=resetAll;
 $("resetLink").onclick=e=>{e.preventDefault();if(confirm("これまでの記録をすべて消して、最初からやり直しますか？\n（消した記録は元に戻せません）"))resetAll()};
 
