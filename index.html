@@ -97,6 +97,9 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 .mock .ico{width:34px;height:34px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;color:#2F7BEA;flex:none}
 .mock .appic{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#FFB347,#FF8A5B);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
 .demo{margin-top:20px;border-top:2px dashed var(--line);padding-top:12px}
+.minna{text-align:center;font-size:13px;font-weight:700;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 12px;margin:0 0 12px}
+.minna b{font-size:18px;color:var(--mint);margin:0 2px}
+.minna.bump b{display:inline-block;animation:pop .6s}
 </style>
 </head>
 <body>
@@ -148,7 +151,8 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 
 <!-- 2 ホーム -->
 <section id="s-home" class="hidden">
-  <div class="top"><div class="day"><b id="dayNum">1</b> 日目 / 10日</div><span class="pill" id="gradeLbl"></span></div>
+  <div class="top"><div class="day"><span id="roundLbl"></span><b id="dayNum">1</b> 日目 / 10日</div><span class="pill" id="gradeLbl"></span></div>
+  <p class="minna hidden" id="minna">🌱 学園のみんなで <b id="minnaNum">0</b> 回チャレンジ！</p>
 
   <div id="homeMain" class="card" style="text-align:center">
     <p class="sec" id="pickMsg"></p>
@@ -220,6 +224,11 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
       <p class="small" id="sendMsg" style="text-align:center;margin:8px 0 0">アンケートに答えると送れるようになります。</p>
     </div>
   </div>
+  <div class="card" style="text-align:center">
+    <p class="sec">もっと続けたい方へ</p>
+    <p class="small" style="margin:0 0 12px">次の10日間に進めます。図鑑は新しくなり、これまでの記録はこの端末に残ります。</p>
+    <button class="btn" id="okawariBtn">おかわり（もう10日）</button>
+  </div>
   <button class="btn ghost" id="reset2">最初からやり直す</button>
 </section>
 
@@ -253,7 +262,12 @@ const TYPES={
    ["今日はお子さんから質問してもらう回です","お子さんから「今日できたことある？」と聞いてもらい、保護者の方が答えてください。大人が自分のよさを言葉にする姿を見せる回です。"]]}
 };
 // 10日間で種類が偏らないよう、出る順番をあらかじめ決めておく
-const PLAN=["dekita","erabu","tsutaeru","ureshii","gyaku","dekita","erabu","tsutaeru","gyaku","dekita"];
+const PLANS=[
+ ["dekita","erabu","tsutaeru","ureshii","gyaku","dekita","erabu","tsutaeru","gyaku","dekita"],
+ ["ureshii","tsutaeru","dekita","erabu","ureshii","gyaku","dekita","tsutaeru","erabu","dekita"],
+ ["erabu","dekita","ureshii","tsutaeru","dekita","gyaku","ureshii","erabu","tsutaeru","dekita"]];
+// 何周目かによって順番を切り替える（4周目以降はくり返し）
+const plan=()=>PLANS[(S.round-1)%PLANS.length];
 const CAPC=["#FF8A5B","#6FB6F0","#5CC8A8"];
 
 let S;
@@ -267,9 +281,10 @@ function syncDay(){
   S.day=Math.max(1,Math.min(10,S.done||S.log.length>=10?S.log.length:S.log.length+1));
   save();
 }
-function fresh(){const b={};CATS.forEach(c=>b[c[0]]=Math.floor(15+Math.random()*40));return{grade:null,nick:"",day:1,done:false,log:[],cur:null,school:b,survey:null}}
+function fresh(){const b={};CATS.forEach(c=>b[c[0]]=Math.floor(15+Math.random()*40));return{grade:null,nick:"",day:1,done:false,log:[],cur:null,school:b,survey:null,round:1,history:[]}}
 try{S=JSON.parse(localStorage.getItem("c10p2"))}catch(e){}
 if(!S)S=fresh();
+if(!S.round)S.round=1;if(!S.history)S.history=[];
 function save(){try{localStorage.setItem("c10p2",JSON.stringify(S))}catch(e){}}
 const $=id=>document.getElementById(id);
 const who=()=>S.nick?S.nick+"さん":"お子さん";
@@ -294,7 +309,7 @@ function renderZukan(el,popKey){const m=counts();el.innerHTML=CATS.map(c=>`<div 
 function renderHome(popKey){
   show("s-home");
   syncDay();
-  $("dayNum").textContent=S.day;$("gradeLbl").textContent=S.grade+"の保護者";
+  $("roundLbl").textContent=S.round>1?S.round+"周目　":"";$("dayNum").textContent=S.day;$("gradeLbl").textContent=S.grade+"の保護者";
   $("pickMsg").textContent="カプセルを1つ選んでください（色の選択は自由です）";
   $("caps").innerHTML="";CAPC.forEach(c=>{const b=document.createElement("button");b.className="cap";b.style.background=c;b.style.animationDelay=Math.random()+"s";b.onclick=()=>openOdai(c);$("caps").appendChild(b)});
   $("homeMain").classList.toggle("hidden",S.done);$("homeDone").classList.toggle("hidden",!S.done);
@@ -303,11 +318,30 @@ function renderHome(popKey){
   const got=Object.keys(counts()).length;
   $("zukanHint").textContent=got<6?`残り${6-got}分野。普段とは違う場面にも、よさが見つかるかもしれません`:"6分野すべてで、よさが見つかりました";
   $("stamps").innerHTML=Array.from({length:10},(_,i)=>{const d=S.log.find(l=>l.day===i+1);return `<div class="st${d?" done":""}">${d?"★":i+1}</div>`}).join("");
+  showMinna(S.minnaBump);S.minnaBump=false;loadMinna();
+}
+
+/* みんなのチャレンジ合計回数（家庭数ではなく回数を出す） */
+// 前回取得した数をすぐ表示し、裏で最新の数を取りに行く
+function showMinna(bump){
+  if(typeof S.minna!=="number")return;
+  $("minnaNum").textContent=S.minna.toLocaleString();
+  const m=$("minna");m.classList.remove("hidden","bump");
+  if(bump){void m.offsetWidth;m.classList.add("bump")}
+}
+function loadMinna(){
+  if(!SHEET_URL)return;
+  fetch(SHEET_URL+"?t="+Date.now()).then(r=>r.json()).then(d=>{
+    if(typeof d.total!=="number")return;
+    // 記録した直後（1分以内）は、送信が反映される前の古い数で減って見えないようにする
+    if(typeof S.minna==="number"&&d.total<S.minna&&Date.now()-(S.minnaAt||0)<60000)return;
+    S.minna=d.total;save();showMinna()
+  }).catch(()=>{});
 }
 
 /* odai */
 function openOdai(color){
-  const type=PLAN[S.day-1],o=TYPES[type],item=o.list[Math.floor(Math.random()*o.list.length)];
+  const type=plan()[S.day-1],o=TYPES[type],item=o.list[Math.floor(Math.random()*o.list.length)];
   S.cur={type,q:item[0],pred:null,cat:null};
   show("s-odai");$("dayNum2").textContent=S.day;
   ["odaiBox","didWrap","catWrap"].forEach(i=>$(i).classList.add("hidden"));
@@ -335,7 +369,10 @@ $("catSkip").onclick=()=>{S.cur.cat=null;finish()};
 function finish(){
 
   const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat,date:today()});
-  S.done=true;S.lastDate=today();save();autoSend();
+  S.done=true;S.lastDate=today();
+  // 自分の1回をすぐ合計に足して見せる（正しい数は次に取得したときに置き換わる）
+  if(typeof S.minna==="number"){S.minna++;S.minnaAt=Date.now();S.minnaBump=true}
+  save();autoSend();
   toast(c.cat?cat(c.cat)[1]:"⭐",c.cat?"図鑑に記録しました":"記録しました");confetti();
   setTimeout(()=>{if(S.log.length>=10){renderCert();confetti(60)}else renderHome(c.cat)},1300);
 };
@@ -353,7 +390,7 @@ function payload(){
   const cats={};CATS.forEach(c=>cats[c[2]]=0);S.log.forEach(l=>{if(l.cat)cats[cat(l.cat)[2]]++});
   const asked=S.log.filter(l=>TYPES[l.type].ask||TYPES[l.type].cat);
   const dates=S.log.map(l=>l.date).filter(Boolean);
-  const data={uid:uid(),grade:S.grade,count:S.log.length,start:dates[0]||"",end:dates[dates.length-1]||"",cats,
+  const data={uid:uid(),round:S.round,grade:S.grade,count:S.log.length,start:dates[0]||"",end:dates[dates.length-1]||"",cats,
     none:asked.filter(l=>!l.cat).length,survey:S.survey,
     days:S.log.map(l=>TYPES[l.type].nm+(l.cat?"："+cat(l.cat)[2]:(TYPES[l.type].ask||TYPES[l.type].cat)?"：話なし":""))};
   return data;
@@ -373,7 +410,7 @@ $("sendBtn").onclick=()=>{
 function renderCert(){
   show("s-cert");
   $("certFor").textContent="保護者も一緒にチャレンジ10";
-  $("certTtl").textContent=(S.nick?S.nick+"さんの":"")+"10のできた";
+  $("certTtl").textContent=(S.nick?S.nick+"さんの":"")+(S.round>1?S.round+"周目の":"")+"10のできた";
   const n=S.log.filter(l=>l.cat).length,g=Object.keys(counts()).length;
   $("certMsg").innerHTML=`10日間で <b>${n}個</b> の「できた」と<br><b>${g}種類</b> のいいところが見つかりました。<br>おうちの人と一緒に、よく頑張りました！`;
   $("cZTtl").textContent="📖 "+who()+"のいいところ図鑑";renderZukan($("cZukan"));
@@ -382,6 +419,15 @@ function renderCert(){
   [["😄","あった"],["🙂","少しあった"],["🤔","あまりなかった"]].forEach(([ic,nm])=>{const b=document.createElement("button");b.className="chip"+(S.survey===nm?" on":"");b.innerHTML=`<span class="ic">${ic}</span>${nm}`;b.onclick=()=>{S.survey=nm;save();document.querySelectorAll("#surveyGrid .chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("thanks").classList.remove("hidden");updateSend()};$("surveyGrid").appendChild(b)});
   updateSend();
 }
+
+/* おかわり：次の10日間へ進む */
+$("okawariBtn").onclick=()=>{
+  if(!confirm("次の10日間に進みますか？\n（これまでの記録は残ります）"))return;
+  S.history.push({round:S.round,log:S.log,survey:S.survey});
+  S.round++;S.log=[];S.survey=null;S.sent=false;S.cur=null;
+  // 今日すでに記録した場合は、次の1日目は明日から
+  save();renderHome();
+};
 
 /* demo */
 // アプリを開いたまま日付をまたいだ場合も、画面に戻ったときに次の日へ進める
