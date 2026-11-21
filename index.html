@@ -41,6 +41,10 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 .stamps{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:12px}
 .st{aspect-ratio:1;border-radius:50%;border:2px dashed #E8D9C8;display:flex;align-items:center;justify-content:center;font-size:10px;color:#CDBBA8;font-weight:700}
 .st.done{border:none;background:radial-gradient(circle at 35% 35%,#FFD27A,#FF9F45);color:#fff}
+.st.gold{background:radial-gradient(circle at 35% 35%,#FFF6C8,#E8B400);box-shadow:0 0 0 2px #FFE27A}
+/* 金色のカプセル（当たり） */
+.goldc{background:linear-gradient(135deg,#FFF3A8,#F2C230 45%,#C99400)!important;box-shadow:0 0 12px #FFD54A}
+.atari{position:absolute;left:50%;top:44px;translate:-50% 0;font-size:17px;font-weight:800;color:#B07F00;background:#FFF8D6;border:2px solid #F2C230;border-radius:99px;padding:4px 14px;white-space:nowrap;animation:pop .6s;z-index:2}
 .zukan{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .zk{border-radius:18px;padding:12px 4px;text-align:center;background:#FBF5EE;border:2px dashed #E8D9C8}
 .zk .ic{font-size:30px;filter:grayscale(1) brightness(.2);opacity:.18}
@@ -51,6 +55,23 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 @keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
 .handoff{background:#FFF0E8;border-radius:16px;padding:10px 12px;font-size:13px;font-weight:700;color:#D2562A;text-align:center;margin-bottom:12px}
 .caps{display:flex;justify-content:center;gap:16px;margin:8px 0 4px}
+/* ガチャガチャ */
+.gacha{position:relative;width:170px;margin:2px auto 0;cursor:pointer}
+.globe{position:relative;height:124px;border-radius:85px 85px 10px 10px;background:radial-gradient(circle at 30% 25%,#fff 0 12%,#EEF7FF 40%,#DDEEFB);border:4px solid #fff;box-shadow:inset 0 -6px 0 rgba(0,0,0,.04),0 0 0 2px var(--line);overflow:hidden}
+.mini{position:absolute;width:34px;height:34px;border-radius:50%;box-shadow:inset 0 -2px 0 rgba(0,0,0,.08)}
+.mini:after{content:"";position:absolute;left:0;right:0;bottom:0;height:50%;background:#fff;border-radius:0 0 17px 17px}
+.globe.shake .mini{animation:jig .18s ease-in-out 5}
+@keyframes jig{0%,100%{translate:0 0}25%{translate:-4px 3px}75%{translate:4px -3px}}
+.gbody{position:relative;height:74px;margin-top:-4px;background:linear-gradient(#FF9C72,var(--main));border-radius:8px 8px 16px 16px;box-shadow:0 5px 0 #E06A3B}
+.outlet{position:absolute;left:16px;bottom:12px;width:50px;height:38px;background:#7a3b22;border-radius:10px 10px 6px 6px;overflow:hidden}
+.handle{position:absolute;right:18px;top:11px;width:52px;height:52px;border-radius:50%;border:none;background:#fff;box-shadow:0 3px 0 #E06A3B;cursor:pointer;padding:0}
+.handle:after{content:"";position:absolute;left:8px;right:8px;top:50%;height:12px;margin-top:-6px;background:#F1E6DA;border-radius:6px}
+.handle.turn{transition:transform 1s cubic-bezier(.4,0,.3,1);transform:rotate(540deg)}
+.gacha:not(.busy) .handle{animation:nudge 2.4s ease-in-out infinite}
+@keyframes nudge{0%,80%,100%{transform:rotate(0)}88%{transform:rotate(-25deg)}94%{transform:rotate(10deg)}}
+.drop{position:absolute;left:8px;top:4px;width:34px;height:34px;border-radius:50%;animation:dropin .45s cubic-bezier(.3,1.6,.5,1)}
+.drop:after{content:"";position:absolute;left:0;right:0;bottom:0;height:50%;background:#fff;border-radius:0 0 17px 17px}
+@keyframes dropin{from{transform:translateY(-40px)}to{transform:none}}
 .cap{width:80px;height:80px;border-radius:50%;border:none;cursor:pointer;position:relative;box-shadow:0 5px 0 rgba(0,0,0,.12);animation:wig .9s ease infinite}
 .cap:after{content:"";position:absolute;left:0;right:0;bottom:0;height:50%;background:#fff;border-radius:0 0 40px 40px;border-top:3px solid rgba(0,0,0,.06)}
 @keyframes wig{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
@@ -156,7 +177,10 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 
   <div id="homeMain" class="card" style="text-align:center">
     <p class="sec" id="pickMsg"></p>
-    <div class="caps" id="caps"></div>
+    <div class="gacha" id="gacha">
+      <div class="globe" id="globe"></div>
+      <div class="gbody"><div class="outlet" id="outlet"></div><button class="handle" id="handle" aria-label="ハンドルを回す"></button></div>
+    </div>
   </div>
   <div id="homeDone" class="card hidden" style="text-align:center">
     <div style="font-size:38px">✅</div>
@@ -258,6 +282,10 @@ const TYPES={
  tsutaeru:{nm:"伝える",c:"#5CC8A8",ask:false,cat:true,list:[
    ["「〇〇してくれて、ありがとう」","今日のお子さんの行動について、1つお礼を伝えてください。"],
    ["「〇〇なところ、いいね」","お子さんの性格や行動のよいところを、1つ言葉にして伝えてください。"]]},
+ tokuten:{nm:"✨とっておき",c:"#D4A000",ask:false,list:[
+   ["「あなたがいてくれて、うれしいよ」","当たりの日は、理由なしで「いてくれてうれしい」と伝える日です。何かができたからではなく、存在そのものを認める言葉です。"],
+   ["「生まれてきてくれて、ありがとう」","少し照れくさい言葉ですが、当たりの日だからこそ言える一言です。"],
+   ["「小さいころの〇〇、よく覚えてるよ」","お子さんが小さかったころの思い出を1つ話してあげてください。大切にされてきたことが伝わります。"]]},
  gyaku:{nm:"逆質問",c:"#B79CF0",ask:false,list:[
    ["今日はお子さんから質問してもらう回です","お子さんから「今日できたことある？」と聞いてもらい、保護者の方が答えてください。大人が自分のよさを言葉にする姿を見せる回です。"]]}
 };
@@ -268,7 +296,9 @@ const PLANS=[
  ["erabu","dekita","ureshii","tsutaeru","dekita","gyaku","ureshii","erabu","tsutaeru","dekita"]];
 // 何周目かによって順番を切り替える（4周目以降はくり返し）
 const plan=()=>PLANS[(S.round-1)%PLANS.length];
-const CAPC=["#FF8A5B","#6FB6F0","#5CC8A8"];
+const CAPC=["#FF8A5B","#6FB6F0","#5CC8A8","#F59AB5","#FFC94D","#B79CF0"];
+// ガチャガチャの中のカプセルの位置（左, 上, 傾き）
+const MINI=[[8,74,-20],[40,82,15],[74,78,-5],[108,80,30],[22,46,40],[58,50,-35],[94,48,10],[124,52,-15],[44,18,25],[82,20,-30]];
 
 let S;
 // 端末の日付（例：2026-11-09）
@@ -285,6 +315,12 @@ function fresh(){const b={};CATS.forEach(c=>b[c[0]]=Math.floor(15+Math.random()*
 try{S=JSON.parse(localStorage.getItem("c10p2"))}catch(e){}
 if(!S)S=fresh();
 if(!S.round)S.round=1;if(!S.history)S.history=[];
+// 各周に1回だけの「当たり」の日（3〜9日目のどこか。最初の2日と最終日は外す）
+function pickGold(){S.goldDay=3+Math.floor(Math.random()*7)}
+if(!S.goldDay)pickGold();
+// お試し用：URLの末尾に ?gold を付けて開くと、次のガチャが必ず当たりになる
+const TRY_GOLD=/[?&]gold\b/.test(location.search);
+const isGold=()=>TRY_GOLD||S.day===S.goldDay;
 function save(){try{localStorage.setItem("c10p2",JSON.stringify(S))}catch(e){}}
 const $=id=>document.getElementById(id);
 const who=()=>S.nick?S.nick+"さん":"お子さん";
@@ -310,14 +346,14 @@ function renderHome(popKey){
   show("s-home");
   syncDay();
   $("roundLbl").textContent=S.round>1?S.round+"周目　":"";$("dayNum").textContent=S.day;$("gradeLbl").textContent=S.grade+"の保護者";
-  $("pickMsg").textContent="カプセルを1つ選んでください（色の選択は自由です）";
-  $("caps").innerHTML="";CAPC.forEach(c=>{const b=document.createElement("button");b.className="cap";b.style.background=c;b.style.animationDelay=Math.random()+"s";b.onclick=()=>openOdai(c);$("caps").appendChild(b)});
+  $("pickMsg").textContent="ハンドルを回して、今日のお題を出そう";
+  setupGacha();
   $("homeMain").classList.toggle("hidden",S.done);$("homeDone").classList.toggle("hidden",!S.done);
   $("zukanTtl").textContent="📖 "+who()+"のいいところ図鑑";
   renderZukan($("zukan"),popKey);
   const got=Object.keys(counts()).length;
   $("zukanHint").textContent=got<6?`残り${6-got}分野。普段とは違う場面にも、よさが見つかるかもしれません`:"6分野すべてで、よさが見つかりました";
-  $("stamps").innerHTML=Array.from({length:10},(_,i)=>{const d=S.log.find(l=>l.day===i+1);return `<div class="st${d?" done":""}">${d?"★":i+1}</div>`}).join("");
+  $("stamps").innerHTML=Array.from({length:10},(_,i)=>{const d=S.log.find(l=>l.day===i+1);return `<div class="st${d?" done":""}${d&&d.gold?" gold":""}">${d?"★":i+1}</div>`}).join("");
   showMinna(S.minnaBump);S.minnaBump=false;loadMinna();
 }
 
@@ -339,14 +375,32 @@ function loadMinna(){
   }).catch(()=>{});
 }
 
+/* ガチャガチャ：ハンドル（本体のどこでも可）を押すと回って、カプセルが出てくる */
+function setupGacha(){
+  const g=$("gacha");g.classList.remove("busy");g.querySelectorAll(".atari").forEach(e=>e.remove());
+  $("handle").classList.remove("turn");$("outlet").innerHTML="";$("globe").classList.remove("shake");
+  $("globe").innerHTML=MINI.map((m,i)=>`<div class="mini" style="left:${m[0]}px;top:${m[1]}px;rotate:${m[2]}deg;background:${CAPC[i%CAPC.length]}"></div>`).join("");
+  g.onclick=()=>{
+    if(g.classList.contains("busy"))return;g.classList.add("busy");
+    const gold=isGold(),color=gold?"gold":CAPC[Math.floor(Math.random()*CAPC.length)];
+    $("handle").classList.add("turn");$("globe").classList.add("shake");
+    if(navigator.vibrate)navigator.vibrate(30);
+    setTimeout(()=>{
+      $("outlet").innerHTML=gold?`<div class="drop goldc"></div>`:`<div class="drop" style="background:${color}"></div>`;
+      if(gold){g.insertAdjacentHTML("beforeend",`<div class="atari">✨ 当たり！ ✨</div>`);confetti(40);if(navigator.vibrate)navigator.vibrate([40,60,40])}
+    },950);
+    setTimeout(()=>openOdai(color),gold?2600:1700);
+  };
+}
+
 /* odai */
 function openOdai(color){
-  const type=plan()[S.day-1],o=TYPES[type],item=o.list[Math.floor(Math.random()*o.list.length)];
-  S.cur={type,q:item[0],pred:null,cat:null};
+  const gold=color==="gold",type=gold?"tokuten":plan()[S.day-1],o=TYPES[type],item=o.list[Math.floor(Math.random()*o.list.length)];
+  S.cur={type,q:item[0],pred:null,cat:null,gold};
   show("s-odai");$("dayNum2").textContent=S.day;
   ["odaiBox","didWrap","catWrap"].forEach(i=>$(i).classList.add("hidden"));
   const cb=$("capbig");cb.classList.remove("hidden","open");cb.style.animation="none";void cb.offsetWidth;cb.style.animation="";
-  $("capTop").style.background=color;
+  $("capTop").classList.toggle("goldc",gold);$("capTop").style.background=gold?"":color;
   setTimeout(()=>cb.classList.add("open"),650);
   setTimeout(()=>{
     cb.classList.add("hidden");
@@ -368,7 +422,7 @@ function showCat(){
 $("catSkip").onclick=()=>{S.cur.cat=null;finish()};
 function finish(){
 
-  const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat,date:today()});
+  const c=S.cur;S.log.push({day:S.day,type:c.type,q:c.q,cat:c.cat,date:today(),gold:!!c.gold});
   S.done=true;S.lastDate=today();
   // 自分の1回をすぐ合計に足して見せる（正しい数は次に取得したときに置き換わる）
   if(typeof S.minna==="number"){S.minna++;S.minnaAt=Date.now();S.minnaBump=true}
@@ -424,7 +478,7 @@ function renderCert(){
 $("okawariBtn").onclick=()=>{
   if(!confirm("次の10日間に進みますか？\n（これまでの記録は残ります）"))return;
   S.history.push({round:S.round,log:S.log,survey:S.survey});
-  S.round++;S.log=[];S.survey=null;S.sent=false;S.cur=null;
+  S.round++;S.log=[];S.survey=null;S.sent=false;S.cur=null;pickGold();
   // 今日すでに記録した場合は、次の1日目は明日から
   save();renderHome();
 };
@@ -432,7 +486,7 @@ $("okawariBtn").onclick=()=>{
 /* demo */
 // アプリを開いたまま日付をまたいだ場合も、画面に戻ったときに次の日へ進める
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.grade&&S.log.length<10&&!$("s-home").classList.contains("hidden")){syncDay();renderHome()}});
-function resetAll(){const keep=S.uid;try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();if(keep){S.uid=keep;save()}document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
+function resetAll(){const keep=S.uid;try{localStorage.removeItem("c10p2")}catch(e){}S=fresh();pickGold();if(keep){S.uid=keep;save()}document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));$("startBtn").disabled=true;$("nick").value="";show("s-start")}
 $("reset2").onclick=resetAll;
 $("resetLink").onclick=e=>{e.preventDefault();if(confirm("これまでの記録をすべて消して、最初からやり直しますか？\n（消した記録は元に戻せません）"))resetAll()};
 
