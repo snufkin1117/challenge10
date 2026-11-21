@@ -72,6 +72,22 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 .drop{position:absolute;left:8px;top:4px;width:34px;height:34px;border-radius:50%;animation:dropin .45s cubic-bezier(.3,1.6,.5,1)}
 .drop:after{content:"";position:absolute;left:0;right:0;bottom:0;height:50%;background:#fff;border-radius:0 0 17px 17px}
 @keyframes dropin{from{transform:translateY(-40px)}to{transform:none}}
+/* 出てきたカプセル（タップして開ける） */
+.popc{position:absolute;right:-34px;bottom:-6px;width:70px;height:70px;border:none;padding:0;border-radius:50%;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,.18);animation:rollout .7s cubic-bezier(.3,1.4,.5,1),bob 1.4s ease-in-out .7s infinite;z-index:3}
+.popc:after{content:"";position:absolute;left:0;right:0;bottom:0;height:50%;background:#fff;border-radius:0 0 35px 35px;border-top:3px solid rgba(0,0,0,.06)}
+@keyframes rollout{from{transform:translate(-110px,-10px) rotate(-300deg) scale(.5)}to{transform:none}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.tapme{position:absolute;right:-46px;bottom:-34px;background:#FFC94D;color:#5a3d00;font-size:13px;font-weight:800;border-radius:99px;padding:4px 12px;white-space:nowrap;box-shadow:0 3px 0 #E0A800;animation:fi .4s;z-index:3}
+.spin{margin-top:22px;font-size:20px;padding:16px;background:linear-gradient(135deg,#FF9A3C,#F4436C);box-shadow:0 5px 0 #C9304F}
+.spin:active{box-shadow:0 2px 0 #C9304F}
+.spinNote{font-size:12px;color:var(--sub);margin:8px 0 0}
+/* 下のタブ */
+#s-home{padding-bottom:84px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:15;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+.tabs button{flex:1;max-width:146px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:800;color:#B8ACA3;cursor:pointer;padding:4px 0}
+.tabs button .ti{display:block;font-size:24px;filter:grayscale(1);opacity:.55;margin-bottom:2px}
+.tabs button.on{color:#D2562A}.tabs button.on .ti{filter:none;opacity:1}
+.tabs button.on:after{content:"";display:block;width:28px;height:4px;border-radius:2px;background:var(--main);margin:3px auto 0}
 .cap{width:80px;height:80px;border-radius:50%;border:none;cursor:pointer;position:relative;box-shadow:0 5px 0 rgba(0,0,0,.12);animation:wig .9s ease infinite}
 .cap:after{content:"";position:absolute;left:0;right:0;bottom:0;height:50%;background:#fff;border-radius:0 0 40px 40px;border-top:3px solid rgba(0,0,0,.06)}
 @keyframes wig{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
@@ -165,7 +181,7 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
 
   <div class="card" style="margin-top:6px">
     <p class="sec">毎日の使い方</p>
-    <p class="small" style="margin:0">アイコンを開く → カプセルを選ぶ → お子さんに声をかける → 「声をかけました」 → 話の分野を1つ選ぶ。<br>毎日の通知はありません。夕食後など、時間を決めておくと続けやすくなります。</p>
+    <p class="small" style="margin:0">アイコンを開く → ガチャを回してカプセルを開ける → お子さんに声をかける → 「声をかけました」 → 話の分野を1つ選ぶ。<br>毎日の通知はありません。夕食後など、時間を決めておくと続けやすくなります。</p>
   </div>
   <button class="btn" id="guideBack">戻る</button>
 </section>
@@ -175,12 +191,15 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
   <div class="top"><div class="day"><span id="roundLbl"></span><b id="dayNum">1</b> 日目 / 10日</div><span class="pill" id="gradeLbl"></span></div>
   <p class="minna hidden" id="minna">🌱 学園のみんなで <b id="minnaNum">0</b> 回チャレンジ！</p>
 
+  <div id="tab-gacha">
   <div id="homeMain" class="card" style="text-align:center">
     <p class="sec" id="pickMsg"></p>
     <div class="gacha" id="gacha">
       <div class="globe" id="globe"></div>
       <div class="gbody"><div class="outlet" id="outlet"></div><button class="handle" id="handle" aria-label="ハンドルを回す"></button></div>
     </div>
+    <button class="btn spin" id="spinBtn">🎰 ガチャをまわす！</button>
+    <p class="spinNote" id="spinNote">1日1回。出たお題で、お子さんに声をかけてみよう</p>
   </div>
   <div id="homeDone" class="card hidden" style="text-align:center">
     <div style="font-size:38px">✅</div>
@@ -188,13 +207,31 @@ input.txt{width:100%;border:2px solid var(--line);border-radius:14px;padding:12p
     <p class="small">次回は明日以降に記録できます。</p>
   </div>
 
+  <div class="card" style="padding:12px 14px">
+    <p class="small" style="margin:0;font-weight:700">10日間のスタンプ</p>
+    <div class="stamps" id="stamps" style="margin-top:8px"></div>
+  </div>
+  </div>
+
+  <div id="tab-zukan" class="hidden">
   <div class="card">
     <p class="sec" id="zukanTtl"></p>
     <div class="zukan" id="zukan"></div>
     <p class="small" id="zukanHint" style="text-align:center;margin:10px 0 0"></p>
-    <div class="stamps" id="stamps"></div>
   </div>
+  </div>
+
+  <div id="tab-kiroku" class="hidden">
+  <div class="card"><p class="sec" id="kTtl">きろく</p><div id="kList"></div></div>
+  <button class="btn ghost" id="guideBtn2">📲 ホーム画面に追加する方法</button>
   <p style="text-align:center;margin-top:24px"><a href="#" id="resetLink" class="small" style="color:var(--sub)">記録をすべて消して、最初からやり直す</a></p>
+  </div>
+
+  <nav class="tabs">
+    <button data-tab="gacha" class="on"><span class="ti">🎰</span>ガチャ</button>
+    <button data-tab="zukan"><span class="ti">📖</span>図鑑</button>
+    <button data-tab="kiroku"><span class="ti">🗒️</span>きろく</button>
+  </nav>
 
 
 </section>
@@ -331,12 +368,13 @@ const cat=k=>CATS.find(c=>c[0]===k);
 GR.forEach(g=>{const b=document.createElement("button");b.className="chip";b.textContent=g;b.onclick=()=>{document.querySelectorAll("#gradeGrid .chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");S.grade=g;$("startBtn").disabled=false};$("gradeGrid").appendChild(b)});
 $("startBtn").onclick=()=>{S.nick=$("nick").value.trim();save();renderHome()};
 
-$("guideBtn").onclick=()=>show("s-guide");$("guideBack").onclick=()=>show("s-start");
+let guideFrom="s-start";
+$("guideBtn").onclick=()=>{show("s-guide");guideFrom="s-start"};$("guideBack").onclick=()=>guideFrom==="s-home"?renderHome():show("s-start");
 document.querySelectorAll(".osTabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".osTabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("g-ios").classList.toggle("hidden",b.dataset.os!=="ios");$("g-android").classList.toggle("hidden",b.dataset.os!=="android")});
 if(/android/i.test(navigator.userAgent)){document.querySelector('[data-os="android"]').click()}
 
 const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
-if(standalone)$("guideBtn").classList.add("hidden");
+if(standalone){$("guideBtn").classList.add("hidden");$("guideBtn2").classList.add("hidden")}
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 
 /* home */
@@ -346,8 +384,8 @@ function renderHome(popKey){
   show("s-home");
   syncDay();
   $("roundLbl").textContent=S.round>1?S.round+"周目　":"";$("dayNum").textContent=S.day;$("gradeLbl").textContent=S.grade+"の保護者";
-  $("pickMsg").textContent="ハンドルを回して、今日のお題を出そう";
-  setupGacha();
+  $("pickMsg").textContent="今日のお題を出そう";
+  setupGacha();renderKiroku();
   $("homeMain").classList.toggle("hidden",S.done);$("homeDone").classList.toggle("hidden",!S.done);
   $("zukanTtl").textContent="📖 "+who()+"のいいところ図鑑";
   renderZukan($("zukan"),popKey);
@@ -355,6 +393,8 @@ function renderHome(popKey){
   $("zukanHint").textContent=got<6?`残り${6-got}分野。普段とは違う場面にも、よさが見つかるかもしれません`:"6分野すべてで、よさが見つかりました";
   $("stamps").innerHTML=Array.from({length:10},(_,i)=>{const d=S.log.find(l=>l.day===i+1);return `<div class="st${d?" done":""}${d&&d.gold?" gold":""}">${d?"★":i+1}</div>`}).join("");
   showMinna(S.minnaBump);S.minnaBump=false;loadMinna();
+  // 記録した直後に図鑑に増えたときは、図鑑のタブを開いて見せる
+  tab(popKey?"zukan":"gacha");
 }
 
 /* みんなのチャレンジ合計回数（家庭数ではなく回数を出す） */
@@ -377,20 +417,45 @@ function loadMinna(){
 
 /* ガチャガチャ：ハンドル（本体のどこでも可）を押すと回って、カプセルが出てくる */
 function setupGacha(){
-  const g=$("gacha");g.classList.remove("busy");g.querySelectorAll(".atari").forEach(e=>e.remove());
+  const g=$("gacha");g.classList.remove("busy");g.querySelectorAll(".atari,.popc,.tapme").forEach(e=>e.remove());
   $("handle").classList.remove("turn");$("outlet").innerHTML="";$("globe").classList.remove("shake");
   $("globe").innerHTML=MINI.map((m,i)=>`<div class="mini" style="left:${m[0]}px;top:${m[1]}px;rotate:${m[2]}deg;background:${CAPC[i%CAPC.length]}"></div>`).join("");
-  g.onclick=()=>{
-    if(g.classList.contains("busy"))return;g.classList.add("busy");
-    const gold=isGold(),color=gold?"gold":CAPC[Math.floor(Math.random()*CAPC.length)];
-    $("handle").classList.add("turn");$("globe").classList.add("shake");
-    if(navigator.vibrate)navigator.vibrate(30);
-    setTimeout(()=>{
-      $("outlet").innerHTML=gold?`<div class="drop goldc"></div>`:`<div class="drop" style="background:${color}"></div>`;
-      if(gold){g.insertAdjacentHTML("beforeend",`<div class="atari">✨ 当たり！ ✨</div>`);confetti(40);if(navigator.vibrate)navigator.vibrate([40,60,40])}
-    },950);
-    setTimeout(()=>openOdai(color),gold?2600:1700);
-  };
+  $("spinBtn").disabled=false;$("spinBtn").textContent="🎰 ガチャをまわす！";
+  $("spinNote").textContent="1日1回。出たお題で、お子さんに声をかけてみよう";
+  $("spinBtn").onclick=$("handle").onclick=spin;
+}
+// ガチャを回す → カプセルが転がり出る → タップすると開いてお題が出る
+function spin(){
+  const g=$("gacha");
+  if(g.classList.contains("busy"))return;g.classList.add("busy");
+  const gold=isGold(),color=gold?"gold":CAPC[Math.floor(Math.random()*CAPC.length)];
+  $("spinBtn").disabled=true;$("spinBtn").textContent="ガラガラ…";
+  $("handle").classList.add("turn");$("globe").classList.add("shake");
+  if(navigator.vibrate)navigator.vibrate(30);
+  setTimeout(()=>{
+    const c=document.createElement("button");c.className="popc"+(gold?" goldc":"");c.setAttribute("aria-label","カプセルを開ける");
+    if(!gold)c.style.background=color;
+    c.onclick=()=>openOdai(color);
+    g.appendChild(c);
+    setTimeout(()=>g.insertAdjacentHTML("beforeend",`<div class="tapme">👆 タップして開ける！</div>`),700);
+    $("spinBtn").textContent="カプセルをタップしてね";
+    $("spinNote").textContent=gold?"金色のカプセルは、各周に1回だけの当たりです":"出てきたカプセルを押すと、お題が出ます";
+    if(gold){g.insertAdjacentHTML("beforeend",`<div class="atari">✨ 当たり！ ✨</div>`);confetti(40);if(navigator.vibrate)navigator.vibrate([40,60,40])}
+  },950);
+}
+/* 下のタブ */
+function tab(name){
+  ["gacha","zukan","kiroku"].forEach(t=>$("tab-"+t).classList.toggle("hidden",t!==name));
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===name));
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+$("guideBtn2").onclick=()=>{show("s-guide");guideFrom="s-home"};
+function renderKiroku(){
+  $("kTtl").textContent="🗒️ "+(S.round>1?S.round+"周目の":"")+"きろく";
+  $("kList").innerHTML=S.log.length?S.log.slice().reverse().map(l=>`<div class="li"><span>${l.day}日目</span><div>${l.gold?"✨":""}${TYPES[l.type].nm}${l.cat?"　"+cat(l.cat)[1]+" "+cat(l.cat)[2]:""}<div class="small">${l.q}</div></div></div>`).join("")
+    :`<p class="small" style="margin:0">まだ記録はありません。ガチャを回して、最初のお題に取り組んでみましょう。</p>`;
+  if(S.history.length)$("kList").insertAdjacentHTML("beforeend",`<p class="small" style="margin:10px 0 0">これまでに ${S.history.length} 周（${S.history.reduce((a,h)=>a+h.log.length,0)}回）取り組みました。</p>`);
 }
 
 /* odai */
